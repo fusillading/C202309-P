@@ -1,32 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "ChatGPT.h"
 
 #define MAX_KEYWORD_SIZE 128
 #define MAX_KEYWORD_COUNT 20
 #define MAX_MESSEGE_SIZE 256
 #define MAX_MESSEGE_COUNT 256
 
-// í‚¤ì›Œë“œë¥¼ ì…ë ¥ë°›ê³ , ì…ë ¥ë°›ì€ í‚¤ì›Œë“œì˜ ê°œìˆ˜ë¥¼ ë°˜í™˜í•œë‹¤.
-int input_keywords(char **keywords) {
-  // ëª‡ ê°œì˜ í‚¤ì›Œë“œê°€ ìˆëŠ”ì§€ ì €ì¥í•  ë³€ìˆ˜
+typedef struct KEYnMES{
+  int idx;
+  int keyword_num;
+  char** keyword;
+  char *message;
+}KEYnMES;
+
+// Å°¿öµå¸¦ ÀÔ·Â¹Ş°í, ÀÔ·Â¹ŞÀº Å°¿öµåÀÇ °³¼ö¸¦ ¹İÈ¯ÇÑ´Ù.
+int input_keywords(KEYnMES keynmes) {
+  // ¸î °³ÀÇ Å°¿öµå°¡ ÀÖ´ÂÁö ÀúÀåÇÒ º¯¼ö
   int keyword_count = 0;
   printf(
-      "ìµœëŒ€ %d ê¸€ìì˜ í‚¤ì›Œë“œë¥¼ ì…ë ¥í•˜ì„¸ìš”. (ì…ë ¥ì„ ë§ˆì¹˜ë ¤ë©´ !ë¥¼ ì…ë ¥í•˜ì„¸ìš”)\n",
+      "ÃÖ´ë %d ±ÛÀÚÀÇ Å°¿öµå¸¦ ÀÔ·ÂÇÏ¼¼¿ä. (ÀÔ·ÂÀ» ¸¶Ä¡·Á¸é !¸¦ ÀÔ·ÂÇÏ¼¼¿ä)\n",
       MAX_KEYWORD_SIZE);
   for (int i = 0; i < MAX_KEYWORD_COUNT; i++) {
-    printf("%dë²ˆì§¸ í‚¤ì›Œë“œ: ", i + 1);
-    scanf("%s", keywords[i]);
+    printf("%d¹øÂ° Å°¿öµå: ", i + 1);
+    scanf_s("%s", keynmes.keyword[i], MAX_KEYWORD_SIZE);
 
-    if (keywords[i][0] == '!') {
+    if (keynmes.keyword[i][0] == '!') {
       keyword_count = i;
-      printf("í‚¤ì›Œë“œ ì…ë ¥ì´ ëë‚¬ìŠµë‹ˆë‹¤.\n\n");
+      printf("Å°¿öµå ÀÔ·ÂÀÌ ³¡³µ½À´Ï´Ù.\n\n");
       break;
     }
   }
 
-  printf("ì…ë ¥í•˜ì‹  í‚¤ì›Œë“œëŠ” ì´ %dê°œ ì…ë‹ˆë‹¤.\n", keyword_count);
+  printf("ÀÔ·ÂÇÏ½Å Å°¿öµå´Â ÃÑ %d°³ ÀÔ´Ï´Ù.\n", keyword_count);
+  keynmes.keyword_num = keyword_count; 
   for (int i = 0; i < keyword_count; i++) {
-    printf("%s", keywords[i]);
+    printf("%s", keynmes.keyword[i]);
     if (i < keyword_count - 1) {
       printf(", ");
     } else {
@@ -38,64 +47,64 @@ int input_keywords(char **keywords) {
 }
 
 int main() {
-  // ë©”ì‹œì§€ë¥¼ ì €ì¥í•  ë°°ì—´
-  // char messeges[MAX_MESSEGE_COUNT][MAX_MESSEGE_SIZE];
-  // ë™ì í• ë‹¹ìœ¼ë¡œ ë³€ê²½
-  char **messeges = (char **)malloc(MAX_MESSEGE_COUNT * (int)sizeof(char *));
+  // ¸Ş½ÃÁö¸¦ ÀúÀåÇÒ ±¸Á¶Ã¼¸¦ µ¿ÀûÇÒ´ç, ÃÊ±âÈ­
+  KEYnMES *keynmess =
+      (KEYnMES *)malloc(MAX_MESSEGE_COUNT * (int)sizeof(KEYnMES));
+
   for (int i = 0; i < MAX_MESSEGE_COUNT; i++) {
-    messeges[i] = (char *)malloc(MAX_MESSEGE_SIZE * (int)sizeof(char *));
-  }
-  // í‚¤ì›Œë“œë¥¼ ì €ì¥í•  ë°°ì—´
-  // char keywords[MAX_MESSEGE_COUNT][MAX_KEYWORD_COUNT][MAX_KEYWORD_SIZE];
-  // ë™ì í• ë‹¹ìœ¼ë¡œ ë³€ê²½
-  char ***keywords = (char ***)malloc(MAX_MESSEGE_COUNT * (int)sizeof(char **));
-  for (int i = 0; i < MAX_MESSEGE_COUNT; i++) {
-    keywords[i] = (char **)malloc(MAX_KEYWORD_COUNT * (int)sizeof(char *));
+    keynmess[i].idx = i + 1;
+    keynmess[i].keyword =
+        (char **)malloc(MAX_KEYWORD_COUNT * (int)sizeof(char *));
     for (int j = 0; j < MAX_KEYWORD_COUNT; j++) {
-      keywords[i][j] = (char *)malloc(MAX_KEYWORD_SIZE * (int)sizeof(char));
+      keynmess[i].keyword[j] =
+          (char *)malloc(MAX_KEYWORD_SIZE * (int)sizeof(char));
     }
+    keynmess[i].message = (char *)malloc(MAX_MESSEGE_SIZE * (int)sizeof(char));
   }
 
-  // ë©”ì„¸ì§€ì˜ ê°œìˆ˜, í‚¤ì›Œë“œì˜ ê°œìˆ˜ë¥¼ ì €ì¥í•  ë³€ìˆ˜
-  int messege_count = 0;
+  // ¸Ş¼¼ÁöÀÇ °³¼ö, Å°¿öµåÀÇ °³¼ö¸¦ ÀúÀåÇÒ º¯¼ö
+  int message_count = 0;
   int keyword_count = 0;
 
-  // ì„ íƒí•œ ë©”ë‰´ë¥¼ ì €ì¥í•  ë³€ìˆ˜
+  // ¼±ÅÃÇÑ ¸Ş´º¸¦ ÀúÀåÇÒ º¯¼ö
   int menu = 0;
 
-  printf("**********ìë™ ë©”ì„¸ì§€ ìƒì„±ê¸°**********\n\n");
+  printf("**********ÀÚµ¿ ¸Ş¼¼Áö »ı¼º±â**********\n\n");
 
   while (1) {
-    printf("---------ë©”ë‰´ë¥¼ ì„ íƒí•˜ì„¸ìš”----------\n");
-    printf("1. í‚¤ì›Œë“œë¡œ ë©”ì„¸ì§€ ìƒì„±í•˜ê¸°\n");
-    printf("2. ë©”ì„¸ì§€ ì¶œë ¥í•˜ê¸°\n");
-    printf("3. ë©”ì„¸ì§€ ì¬ìƒì„±í•˜ê¸°\n");
-    printf("4. ë©”ì„¸ì§€ ì‚­ì œí•˜ê¸°\n");
-    printf("5. ì¢…ë£Œí•˜ê¸°\n");
-    scanf("%d", &menu);
+    printf("---------¸Ş´º¸¦ ¼±ÅÃÇÏ¼¼¿ä----------\n");
+    printf("1. Å°¿öµå·Î ¸Ş¼¼Áö »ı¼ºÇÏ±â\n");
+    printf("2. ¸Ş¼¼Áö Ãâ·ÂÇÏ±â\n");
+    printf("3. ¸Ş¼¼Áö Àç»ı¼ºÇÏ±â\n");
+    printf("4. ¸Ş¼¼Áö »èÁ¦ÇÏ±â\n");
+    printf("5. Á¾·áÇÏ±â\n");
+    scanf_s("%d", &menu);
     // break;
 
     if (menu == 1) {
-      // í‚¤ì›Œë“œë¥¼ ì…ë ¥ë°›ê³  ê°œìˆ˜ë¥¼ ë³€ìˆ˜ì— ì €ì¥í•œë‹¤.
-      keyword_count = input_keywords(keywords[messege_count]);
+      // Å°¿öµå¸¦ ÀÔ·Â¹Ş°í °³¼ö¸¦ º¯¼ö¿¡ ÀúÀåÇÑ´Ù.
+      keyword_count = input_keywords(keynmess[message_count]);
 
-      // TODO. ë©”ì„¸ì§€ ìƒì„±í•˜ëŠ” ê¸°ëŠ¥ ì¶”ê°€
+      // TODO. ¸Ş¼¼Áö »ı¼ºÇÏ´Â ±â´É Ãß°¡
+      keynmess[message_count].message =
+          chatGPT(keynmess[message_count].keyword, keyword_count);
+      printf("%s\n", keynmess[message_count].message);
     }
 
     else if (menu == 2) {
-      // TODO. ë©”ì„¸ì§€ ì¶œë ¥í•˜ëŠ” ê¸°ëŠ¥ ì¶”ê°€
+      // TODO. ¸Ş¼¼Áö Ãâ·ÂÇÏ´Â ±â´É Ãß°¡
     }
 
     else if (menu == 3) {
-      // TODO. ë©”ì„¸ì§€ ì¬ìƒì„±í•˜ëŠ” ê¸°ëŠ¥ ì¶”ê°€
+      // TODO. ¸Ş¼¼Áö Àç»ı¼ºÇÏ´Â ±â´É Ãß°¡
     }
 
     else if (menu == 4) {
-      // TODO. ë©”ì„¸ì§€ ì‚­ì œí•˜ëŠ” ê¸°ëŠ¥ ì¶”ê°€
+      // TODO. ¸Ş¼¼Áö »èÁ¦ÇÏ´Â ±â´É Ãß°¡
     }
 
     else if (menu == 5) {
-      printf("í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
+      printf("ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.\n");
       break;
     }
   }

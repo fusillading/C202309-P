@@ -19,7 +19,7 @@ int input_keywords(KEYnMES keynmes) {
   // 몇 개의 키워드가 있는지 저장할 변수
   int keyword_count = 0;
   printf(
-      "최대 %d 글자의 키워드를 입력하세요. (입력을 마치려면 !를 입력하세요)\n",
+      "최대 %d 글자의 영문 키워드를 입력하세요. (입력을 마치려면 !를 입력하세요)\n",
       MAX_KEYWORD_SIZE);
   for (int i = 0; i < MAX_KEYWORD_COUNT; i++) {
     printf("%d번째 키워드: ", i + 1);
@@ -84,23 +84,59 @@ int main() {
     if (menu == 1) {
       // 키워드를 입력받고 개수를 변수에 저장한다.
       keyword_count = input_keywords(keynmess[message_count]);
-
-      // TODO. 메세지 생성하는 기능 추가
+      // chatgpt api를 이용해서 키워드를 통해 메세지를 작성한다.
       keynmess[message_count].message =
           chatGPT(keynmess[message_count].keyword, keyword_count);
-      printf("%s\n", keynmess[message_count].message);
+      // 작성된 메세지를 확인하기 위해 출력해본다.
+      printf("%s\n\n", keynmess[message_count].message);
+      message_count++;
     }
 
     else if (menu == 2) {
-      // TODO. 메세지 출력하는 기능 추가
+      printf("출력할 메세지의 번호를 선택하세요 (%d ~ %d) ", 1, message_count);
+      int print = -1;
+      while (1) {
+        scanf_s("%d", &print);
+
+        if (print < 1 || print > message_count) {
+          continue;
+        } else
+          break;
+      }
+      printf("\n%s\n\n", keynmess[print-1].message);
     }
 
     else if (menu == 3) {
-      // TODO. 메세지 재생성하는 기능 추가
+      printf("재생성할 메세지의 번호를 선택하세요 (%d ~ %d) ", 1, message_count );
+      int remake = -1;
+      while (1) {
+        scanf_s("%d", &remake);
+
+        if (remake < 1 || remake > message_count) {
+          continue;
+        } else
+          break;
+      }
+
+      keynmess[remake-1].message =
+          chatGPT(keynmess[remake-1].keyword, keyword_count);
+      printf("\n%s\n\n", keynmess[remake - 1].message);
     }
 
     else if (menu == 4) {
-      // TODO. 메세지 삭제하는 기능 추가
+      printf("삭제할 메세지의 번호를 입력하세요 (%d ~ %d) ", 1, message_count);
+      int remove = -1;
+      while (1) {
+        scanf_s("%d", &remove);
+
+        if (remove < 1 || remove > message_count) {
+          continue;
+        } else
+          break;
+      }
+      keynmess[remove - 1].message = "삭제된 메세지입니다.";
+      printf("\n삭제되었습니다!");
+        
     }
 
     else if (menu == 5) {

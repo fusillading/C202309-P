@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ChatGPT.h"
 
 #define MAX_KEYWORD_SIZE 128
@@ -77,7 +78,8 @@ int main() {
     printf("2. 메세지 출력하기\n");
     printf("3. 메세지 재생성하기\n");
     printf("4. 메세지 삭제하기\n");
-    printf("5. 종료하기\n");
+    printf("5. 생성된 메세지 파일로 저장하기\n");
+    printf("6. 종료하기\n");
     scanf_s("%d", &menu);
     // break;
 
@@ -134,14 +136,33 @@ int main() {
         } else
           break;
       }
-      keynmess[remove - 1].message = "삭제된 메세지입니다.";
-      printf("\n삭제되었습니다!");
+      for (int i = remove - 1; i < message_count - 1; i++) {
+				keynmess[i] = keynmess[i + 1];
+        keynmess[i].idx = i;
+			}
+      printf("삭제되었습니다.\n");
+      message_count--;
         
+    } else if (menu == 5) {
+      printf("공백없이 저장할 파일의 이름을 입력하세요: ");
+			char filename[128];
+			scanf_s("%s", filename, 128);
+      strcat_s(filename, sizeof(filename), ".txt");
+      FILE *fp;
+      fopen_s(&fp, filename, "w");
+			for (int i = 0; i < message_count; i++) {
+				fprintf(fp, "%d번째 메세지: %s\n", i + 1, keynmess[i].message);
+			}
+			fclose(fp);
+			printf("저장되었습니다!\n");
     }
 
-    else if (menu == 5) {
+    else if (menu == 6) {
       printf("프로그램을 종료합니다.\n");
       break;
+    } 
+    else {
+      printf("잘못된 입력입니다. 다시 입력해주세요.\n");
     }
   }
 }
